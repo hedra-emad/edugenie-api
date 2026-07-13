@@ -5,6 +5,8 @@ import { Course } from '../courses/schema/course.schema';
 import { Types } from 'mongoose';
 import { UpdateSectionDto } from './dto/update-section.dto';
 import { NotFoundException } from '@nestjs/common';
+import { CoursesService } from '../courses/courses.service';
+import { EnrollmentsService } from '../enrollments/enrollments.service';
 
 describe('SectionsService', () => {
   let service: SectionsService;
@@ -12,6 +14,11 @@ describe('SectionsService', () => {
 
   const mockCourseModel = {
     findOneAndUpdate: jest.fn(),
+  };
+
+  // updateSection/removeSection fire a metadata sync after a successful write.
+  const mockCoursesService = {
+    syncMetadata: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -22,6 +29,8 @@ describe('SectionsService', () => {
           provide: getModelToken(Course.name),
           useValue: mockCourseModel,
         },
+        { provide: CoursesService, useValue: mockCoursesService },
+        { provide: EnrollmentsService, useValue: {} },
       ],
     }).compile();
 
@@ -47,12 +56,21 @@ describe('SectionsService', () => {
         description: 'New longer description text that passes the validator',
       };
 
+      // Service maps `updated.sections` through `s.toObject()` before
+      // wrapping each in a SectionSerializer.
       const mockExec = jest.fn().mockResolvedValue({
         sections: [
           {
             _id: sectionId,
             title: dto.title,
             description: dto.description,
+            toObject() {
+              return {
+                _id: sectionId,
+                title: dto.title,
+                description: dto.description,
+              };
+            },
           },
         ],
       });

@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SectionsController } from './sections.controller';
 import { SectionsService } from './sections.service';
 import { UpdateSectionDto } from './dto/update-section.dto';
+import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
+import { RolesGuard } from '../common/guards/roles.guard';
 
 describe('SectionsController', () => {
   let controller: SectionsController;
@@ -22,7 +24,12 @@ describe('SectionsController', () => {
           useValue: mockSectionsService,
         },
       ],
-    }).compile();
+    })
+      .overrideGuard(JwtAuthGuard)
+      .useValue({ canActivate: () => true })
+      .overrideGuard(RolesGuard)
+      .useValue({ canActivate: () => true })
+      .compile();
 
     controller = module.get<SectionsController>(SectionsController);
     service = module.get<SectionsService>(SectionsService);
@@ -63,7 +70,9 @@ describe('SectionsController', () => {
         instructorId,
         updateDto,
       );
-      expect(result).toEqual(mockResult);
+      // Controller wraps the service result in the standard ApiResponse
+      // envelope (`{ success, data }`) — sections.controller.ts:114.
+      expect(result).toEqual({ success: true, data: mockResult });
     });
   });
 });

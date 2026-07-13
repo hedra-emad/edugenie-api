@@ -12,6 +12,7 @@ import { ProgressService } from '../progress/progress.service';
 import { AiService } from '../ai/ai.service';
 import { RemediationService } from '../ai/remediation.service';
 import { NotificationsService } from '../notifications/notifications.service';
+import { CertificatesService } from '../certificates/certificates.service';
 import { Types } from 'mongoose';
 import { BadRequestException } from '@nestjs/common';
 
@@ -60,6 +61,8 @@ describe('QuizzesService', () => {
 
   const mockNotificationsService = {};
 
+  const mockCertificatesService = {};
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -84,6 +87,7 @@ describe('QuizzesService', () => {
         { provide: AiService, useValue: mockAiService },
         { provide: RemediationService, useValue: mockRemediationService },
         { provide: NotificationsService, useValue: mockNotificationsService },
+        { provide: CertificatesService, useValue: mockCertificatesService },
       ],
     }).compile();
 
@@ -252,13 +256,24 @@ describe('QuizzesService', () => {
     const quizId = new Types.ObjectId().toString();
     const instructorId = new Types.ObjectId().toString();
     
+    // A quiz must retain at least MIN_QUESTIONS_PER_QUIZ (5) active questions to
+    // be approvable (quizzes.service.ts:1027-1035), so fixtures carry 5.
+    const activeQuestions = (n: number) =>
+      Array.from({ length: n }, (_, i) => ({
+        _id: `q${i + 1}`,
+        questionText: `Q${i + 1} Text`,
+        type: 'TRUE_FALSE',
+        options: ['True', 'False'],
+        correctAnswers: ['True'],
+        isIgnored: false,
+        createdBy: 'AI',
+      }));
+
     it('Approving with editedQuestions omitted behaves as before', async () => {
       const mockQuiz = {
         _id: quizId,
         sectionId: new Types.ObjectId(),
-        questions: [
-          { _id: 'q1', questionText: 'Q1 Text', type: 'TRUE_FALSE', options: ['True', 'False'], correctAnswers: ['True'], isIgnored: false, createdBy: 'AI' }
-        ],
+        questions: activeQuestions(5),
         status: 'pending_review',
         save: jest.fn().mockResolvedValue(true),
       };
@@ -279,9 +294,9 @@ describe('QuizzesService', () => {
       mockEnrollmentsService.countEnrollmentsForSection = jest.fn().mockResolvedValue(5);
       
       const result = await service.approveQuiz(quizId, instructorId, {});
-      
+
       expect(result.status).toBe('approved');
-      expect(mockQuiz.questions.length).toBe(1);
+      expect(mockQuiz.questions.length).toBe(5);
       expect(mockQuiz.save).toHaveBeenCalled();
     });
 
@@ -289,9 +304,9 @@ describe('QuizzesService', () => {
       const mockQuiz = {
         _id: quizId,
         sectionId: new Types.ObjectId(),
-        questions: [
-          { _id: 'q1', questionText: 'Q1 Text', type: 'TRUE_FALSE', options: ['True', 'False'], correctAnswers: ['True'], isIgnored: false, createdBy: 'AI' }
-        ],
+        // 4 existing AI questions; all are re-submitted below so they survive
+        // the editedQuestions filter, and the 1 new question makes 5 active.
+        questions: activeQuestions(4),
         status: 'pending_review',
         save: jest.fn().mockResolvedValue(true),
       };
@@ -313,26 +328,27 @@ describe('QuizzesService', () => {
       
       const result = await service.approveQuiz(quizId, instructorId, {
         editedQuestions: [
-          {
-            questionId: 'q1',
-            questionText: 'Q1 Text',
+          ...['q1', 'q2', 'q3', 'q4'].map((questionId) => ({
+            questionId,
+            questionText: `${questionId.toUpperCase()} Text`,
             type: 'TRUE_FALSE' as any,
             options: ['True', 'False'],
             correctAnswers: ['True'],
             isIgnored: false,
-          },
+          })),
           {
             questionText: 'Instructor Question',
             type: 'SINGLE_CHOICE' as any,
             options: ['A', 'B'],
             correctAnswers: ['A'],
-          }
-        ]
+          },
+        ],
       });
-      
+
       expect(result.status).toBe('approved');
-      expect(mockQuiz.questions.length).toBe(2);
-      expect(mockQuiz.questions[1].createdBy).toBe('INSTRUCTOR');
+      // 4 re-submitted existing + 1 newly authored = 5.
+      expect(mockQuiz.questions.length).toBe(5);
+      expect(mockQuiz.questions[4].createdBy).toBe('INSTRUCTOR');
       expect(mockQuiz.save).toHaveBeenCalled();
     });
 

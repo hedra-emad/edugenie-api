@@ -2,6 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import { AiController } from './ai.controller';
 import { AiService } from './ai.service';
+import { CoachService } from './coach.service';
+import { CoachMissionsService } from './coach-missions.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 
 describe('AiController', () => {
@@ -15,7 +17,11 @@ describe('AiController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AiController],
-      providers: [{ provide: AiService, useValue: aiService }],
+      providers: [
+        { provide: AiService, useValue: aiService },
+        { provide: CoachService, useValue: {} },
+        { provide: CoachMissionsService, useValue: {} },
+      ],
     })
       // The controller is guarded by JwtAuthGuard + ThrottlerGuard, whose DI
       // isn't wired in this lightweight unit test — stub them out.
@@ -33,7 +39,9 @@ describe('AiController', () => {
   });
 
   it('streams streamLessonChat tokens as SSE frames', async () => {
-    function* gen() {
+    // streamLessonChat returns an AsyncGenerator — the controller consumes it
+    // via Symbol.asyncIterator (ai.controller.ts:64), so the mock must be async.
+    async function* gen() {
       yield 'hi ';
       yield 'there';
     }
