@@ -1,113 +1,114 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# EduGenie API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+The backend for **EduGenie**, an AI-powered e-learning platform. Built with **NestJS**, **TypeScript** and **MongoDB**, it exposes **188 REST endpoints across 32 feature modules** and powers course delivery, payments, certification, and an AI study coach backed by a Retrieval-Augmented Generation (RAG) pipeline.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+**Live:** https://edugenie-api.vercel.app  ·  **Swagger docs:** `/api/docs`
+**Frontends:** [Student web app](https://github.com/hedra-emad/edugenie-student-web) · [Admin dashboard](https://github.com/hedra-emad/edugenie-dashboard)
 
-## Description
+---
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## Features
 
-## Project setup
+**AI & RAG**
+- Retrieval-Augmented Generation pipeline: document chunking → embeddings → indexing → semantic retrieval
+- AI study coach with scheduled missions, auto-generated learning roadmaps, and practice/remediation flows
+- Lecture transcription behind a swappable provider interface (OpenAI and Google Gemini)
 
-```bash
-$ npm install
-```
+**Learning**
+- Courses, sections, lessons, enrollments, progress tracking, notes
+- Quizzes, placement tests, and reporting
+- PDF certificates with QR-code verification
 
-## Compile and run the project
+**Commerce**
+- Cart, orders and checkout
+- Stripe Connect (Express accounts, destination charges, signature-verified webhooks)
+- Automated instructor payouts and earnings
 
-```bash
-# development
-$ npm run start
+**Platform**
+- JWT + Google OAuth 2.0 authentication (Passport)
+- Role-based access control: student, instructor, admin, super-admin
+- Real-time notifications and AI chat over Socket.IO and Pusher
+- Cloudinary media storage, transactional email, audit logs
+- Helmet, request rate limiting, DTO validation, Joi-validated environment config
 
-# watch mode
-$ npm run start:dev
+---
 
-# production mode
-$ npm run start:prod
-```
+## Tech Stack
 
-## Run tests
+| Layer | Technology |
+|---|---|
+| Framework | NestJS 11, TypeScript 5 |
+| Database | MongoDB, Mongoose |
+| Auth | JWT, Passport, Google OAuth 2.0 |
+| Payments | Stripe Connect |
+| Real-time | Socket.IO, Pusher |
+| AI | OpenAI API, Google Gemini API |
+| Media | Cloudinary |
+| Docs | Swagger / OpenAPI |
+| Testing | Jest (33 test suites) |
+| Deployment | Vercel, Railway |
 
-```bash
-# unit tests
-$ npm run test
+---
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+## Getting Started
 
 ```bash
-$ npm install -g @nestjs/mau
-$ mau deploy
+npm install
+cp .env.example .env      # then fill in the values below
+npm run start:dev         # http://localhost:5000
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Environment variables
 
-## Resources
-
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## Payments — Stripe Connect (TEST MODE)
-
-Payments/payouts run on **Stripe Connect (Express) + destination charges**.
-Required env vars (test keys only):
-
-```
+```bash
+MONGODB_URI=
+JWT_SECRET=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+OPENAI_API_KEY=
+GEMINI_API_KEY=
+CLOUDINARY_URL=
 STRIPE_SECRET_KEY=sk_test_...
-STRIPE_WEBHOOK_SECRET=whsec_...   # from `stripe listen --forward-to localhost:5000/api/payments/webhook`
-STRIPE_CONNECT_CLIENT_ID=ca_...   # optional
+STRIPE_WEBHOOK_SECRET=whsec_...
 ```
 
-All optional — without them the payment/payout endpoints return 503 but the app
-still boots. Full setup + end-to-end demo script: see
-[`STRIPE_CONNECT_DEMO.md`](./STRIPE_CONNECT_DEMO.md).
+Payment endpoints return `503` when Stripe keys are absent — the app still boots. Full payment setup and an end-to-end demo script are documented in [`STRIPE_CONNECT_DEMO.md`](./STRIPE_CONNECT_DEMO.md).
 
-## License
+### Scripts
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+npm run start:dev     # watch mode
+npm run test          # unit tests
+npm run test:cov      # coverage
+npm run test:e2e      # end-to-end tests
+npm run seed          # seed the database
+npm run lint          # ESLint + Prettier
+```
+
+---
+
+## Project Structure
+
+```
+src/
+├── ai/              # AI coach, roadmap, practice, remediation, transcription providers
+├── rag/             # chunking, embeddings, indexing, retrieval
+├── auth/            # JWT + Google OAuth
+├── courses/         # courses, sections, lessons
+├── enrollments/     # enrollment and progress
+├── quizzes/         # quizzes and placement tests
+├── payments/        # Stripe Connect, orders, cart
+├── earnings/        # instructor payouts
+├── certificates/    # PDF generation + QR verification
+├── notifications/   # Socket.IO + Pusher gateways
+├── admin/ superadmin/ instructor/
+└── common/          # guards, interceptors, filters, DTOs
+```
+
+---
+
+## Team
+
+Built by a 5-developer team as the graduation project for the **ITI Intensive Code Camp — Full-Stack Web & Generative AI Development using MERN**.
+
+Maintainer: [Hedra Emad](https://github.com/hedra-emad) — Team Leader
