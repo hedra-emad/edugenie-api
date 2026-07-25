@@ -141,3 +141,10 @@ dist
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
 .vite/
+cookies.txt
+login.json
+check-asset*.js
+scratch_check_db.js
+*.diff
+coverage/
+.env
