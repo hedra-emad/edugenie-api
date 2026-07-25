@@ -491,25 +491,40 @@ export class PaymentsService {
       : 0;
 
     // 1) Order (COMPLETED).
-    const [order] = await this.orderModel.create([
-      {
-        studentId: studentObjId,
-        items: [
-          {
-            courseId: course._id,
-            itemType: PurchaseType.FULL_COURSE,
-            courseTitle: course.title,
-            price: course.price,
-          },
-        ],
-        totalAmount: course.price,
-        status: OrderStatus.COMPLETED,
-        paidAt: new Date(),
-        stripeSessionId: session.id,
-        stripePaymentIntentId: paymentIntentId,
-        stripeFee,
-      },
-    ]);
+    // The findOne guard above is the fast path; the unique index on
+    // stripeSessionId is the real guarantee. If two webhook deliveries race
+    // past the guard, the second create hits duplicate-key (11000) — we treat
+    // that as "already fulfilled" and return, so nothing is double-processed.
+    let order: Awaited<ReturnType<typeof this.orderModel.create>>[number];
+    try {
+      [order] = await this.orderModel.create([
+        {
+          studentId: studentObjId,
+          items: [
+            {
+              courseId: course._id,
+              itemType: PurchaseType.FULL_COURSE,
+              courseTitle: course.title,
+              price: course.price,
+            },
+          ],
+          totalAmount: course.price,
+          status: OrderStatus.COMPLETED,
+          paidAt: new Date(),
+          stripeSessionId: session.id,
+          stripePaymentIntentId: paymentIntentId,
+          stripeFee,
+        },
+      ]);
+    } catch (err) {
+      if ((err as { code?: number })?.code === 11000) {
+        this.logger.warn(
+          `Duplicate fulfillment for session ${session.id} — already handled.`,
+        );
+        return;
+      }
+      throw err;
+    }
 
     // 2) Enrollment (full course). Upsert-safe against the unique index.
     try {
