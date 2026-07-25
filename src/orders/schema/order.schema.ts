@@ -47,11 +47,8 @@ export class Order {
 
   // Stripe Checkout Session id — set on fulfillment; also the idempotency guard
   // so a replayed checkout.session.completed webhook can't double-fulfill.
-  @Prop({ type: String, default: null })
-  stripeSessionId: string | null;
-
-  @Prop({ type: String, default: null })
-  stripePaymentIntentId: string | null;
+ @Prop({ type: String, default: null, unique: true, sparse: true })
+ stripeSessionId: string | null;
 
   // Stripe processing fee charged on this sale (major units, e.g. USD). The
   // platform (merchant of record) absorbs this, so it's netted out of revenue.
