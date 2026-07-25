@@ -55,6 +55,9 @@ export class Order {
   @Prop({ type: Number, default: 0 })
   stripeFee: number;
 
+    @Prop({ type: String, default: null })
+  stripePaymentIntentId: string | null;
+  
   // Set when a dispute (chargeback) is handled on this order's charge.
   @Prop({ type: String, default: null })
   stripeChargeId: string | null;
